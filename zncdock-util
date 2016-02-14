@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Requires docker to be running
+make_znc () {
+docker build -t zncmake ./znc-alpine/ && \
+docker run -v $(pwd)/znc-alpine/build:/share zncmake
+}
+
+build_zncdock () {
+docker build -t zncdock .
+}
+
+make_znc_config () {
+    docker run -it -v $(pwd)/.znc:/home/znc/.znc zncdock znc --makeconf
+}
+
+run_zncdock () {
+    docker run -it -v $(pwd)/.znc:/home/znc/.znc -p 1234:1234 zncdock
+}
+
+
+# MAIN PRORGRAM
+main() {
+    local CMD="$1"
+
+    shift || true
+
+    case "$CMD" in
+
+    # Global Commands
+
+    "-h" | "--help")    echo "A useful help message goes here";;
+
+    "make")             make_znc && build_zncdock;;
+
+    "config")           make_znc_config;;
+
+    "run")              run_zncdock;;
+
+    *)                  echo "Try --help, although it's not helpful";;
+
+     esac
+}
+
+main $@
